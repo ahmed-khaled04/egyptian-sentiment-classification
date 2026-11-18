@@ -1,0 +1,36 @@
+{
+  "before_cap": {
+    "train": {
+      "neutral": 6280,
+      "negative": 2001,
+      "positive": 847
+    },
+    "val": {
+      "neutral": 785,
+      "negative": 250,
+      "positive": 106
+    },
+    "test": {
+      "neutral": 786,
+      "negative": 251,
+      "positive": 105
+    }
+  },
+  "after_cap": {
+    "train": {
+      "neutral": 2001,
+      "negative": 2001,
+      "positive": 847
+    },
+    "val": {
+      "neutral": 785,
+      "negative": 250,
+      "positive": 106
+    },
+    "test": {
+      "neutral": 786,
+      "negative": 251,
+      "positive": 105
+    }
+  }
+}
