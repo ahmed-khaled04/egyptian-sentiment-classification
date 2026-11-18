@@ -1,0 +1,17 @@
+name: emb_avg
+type: neural
+arch: avg
+seeds: [42, 43, 44]
+data:
+  train: data/processed/train.csv
+  val: data/processed/val.csv
+embeddings: embeddings/fasttext_ar_300.npz
+freeze_embeddings: false
+max_len: 64
+dropout: 0.3
+batch_size: 64
+lr: 2.0e-3
+epochs: 30
+patience: 4        # early stopping on val macro-F1
+device: auto
+output_dir: models/emb_avg

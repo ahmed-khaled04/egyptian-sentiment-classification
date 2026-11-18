@@ -11,10 +11,11 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from src.models import tfidf_lr
+from src.models import neural, tfidf_lr
 
 TRAINERS = {
     "tfidf_lr": tfidf_lr.train,
+    "neural": neural.train,
 }
 
 
@@ -34,7 +35,7 @@ def load_config(path: str) -> dict:
 
 
 def run(cfg: dict) -> dict:
-    set_seed(cfg["seed"])
+    set_seed(cfg.get("seed", cfg.get("seeds", [0])[0]))
     result = TRAINERS[cfg["type"]](cfg)
     out_dir = Path(cfg["output_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)

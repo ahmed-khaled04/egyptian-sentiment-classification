@@ -1,0 +1,3 @@
+model,test_set,n_seeds,macro_f1_mean,macro_f1_std,accuracy_mean,accuracy_std,f1_positive_mean,f1_positive_std,f1_negative_mean,f1_negative_std,f1_neutral_mean,f1_neutral_std
+majority,in_domain,1,0.2719252724442138,,0.6888694127957932,,0.0,,0.0,,0.8157758173326414,
+tfidf_lr,in_domain,1,0.5792815448218409,,0.6950043821209465,,0.3821138211382114,,0.5613382899628253,,0.794392523364486,

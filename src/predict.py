@@ -2,8 +2,13 @@
 
 Every model exposes `predict_proba(texts) -> (n, 3)` with columns in LABELS order,
 and `predict(text) -> {label: prob}`.
+
+Neural models are trained with several seeds. `load_predictor(name)` returns the
+seed with the best val macro-F1 (used by the app); evaluation iterates over all
+seeds via `model_seeds(name)` to report mean ± std.
 """
 
+import json
 from pathlib import Path
 
 import joblib
@@ -55,24 +60,60 @@ class SklearnPredictor(Predictor):
         return self.pipeline.predict_proba(list(texts))[:, self._order]
 
 
-# name -> (display name, artifact that must exist, loader)
+class NeuralPredictor(Predictor):
+    def __init__(self, name: str, display_name: str, path: Path):
+        from src.models.neural import load_checkpoint  # torch import only when needed
+
+        self.name, self.display_name = name, display_name
+        self.model, self.vocab, self.max_len = load_checkpoint(path)
+
+    def predict_proba(self, texts):
+        from src.models.neural import predict_proba
+
+        return predict_proba(self.model, self.vocab, texts, self.max_len, device="cpu")
+
+
+# name -> (display name, kind)
 REGISTRY = {
-    "tfidf_lr": (
-        "M1: TF-IDF + LogReg",
-        MODELS_DIR / "tfidf_lr/model.joblib",
-        lambda: SklearnPredictor("tfidf_lr", "M1: TF-IDF + LogReg", MODELS_DIR / "tfidf_lr/model.joblib"),
-    ),
+    "tfidf_lr": ("M1: TF-IDF + LogReg", "sklearn"),
+    "emb_avg": ("M2: Embedding avg + Linear", "neural"),
+    "emb_lstm": ("M3: Embedding + BiLSTM", "neural"),
 }
+ARTIFACT = {"sklearn": "model.joblib", "neural": "model.pt"}
+LOADERS = {"sklearn": SklearnPredictor, "neural": NeuralPredictor}
+
+
+def _artifact(name: str, seed: int | None) -> Path:
+    kind = REGISTRY[name][1]
+    base = MODELS_DIR / name if seed is None else MODELS_DIR / name / f"seed_{seed}"
+    return base / ARTIFACT[kind]
+
+
+def model_seeds(name: str) -> list[int | None]:
+    """Seeds with a saved checkpoint; [None] for single-run models."""
+    if name == "majority" or _artifact(name, None).exists():
+        return [None]
+    return sorted(int(p.parent.name.split("_")[1]) for p in (MODELS_DIR / name).glob(f"seed_*/{ARTIFACT[REGISTRY[name][1]]}"))
+
+
+def best_seed(name: str) -> int | None:
+    result = MODELS_DIR / name / "train_result.json"
+    if result.exists():
+        return json.loads(result.read_text()).get("best_seed")
+    return None
 
 
 def available_models() -> list[str]:
-    return [name for name, (_, artifact, _) in REGISTRY.items() if artifact.exists()]
+    return [name for name in REGISTRY if (MODELS_DIR / name).exists() and model_seeds(name)]
 
 
-def load_predictor(name: str) -> Predictor:
+def load_predictor(name: str, seed: int | None = None) -> Predictor:
     if name == "majority":
         return MajorityPredictor()
-    _, artifact, loader = REGISTRY[name]
-    if not artifact.exists():
-        raise FileNotFoundError(f"{name}: {artifact} not found, train it first")
-    return loader()
+    display, kind = REGISTRY[name]
+    seeds = model_seeds(name)
+    if not seeds:
+        raise FileNotFoundError(f"{name}: no checkpoint under {MODELS_DIR / name}, train it first")
+    if seed is None and seeds != [None]:
+        seed = best_seed(name) if best_seed(name) in seeds else seeds[0]
+    return LOADERS[kind](name, display, _artifact(name, seed))
