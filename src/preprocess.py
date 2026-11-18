@@ -7,6 +7,7 @@ Two modes:
 """
 
 import re
+import unicodedata
 
 URL_TOKEN = "<URL>"
 USER_TOKEN = "<USER>"
@@ -15,6 +16,8 @@ NUM_TOKEN = "<NUM>"
 _TASHKEEL = re.compile(r"[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]")
 _TATWEEL = re.compile(r"\u0640")
 _ALEF = re.compile(r"[إأآٱ]")
+# Leading retweet attribution: "RT @user:".
+_RETWEET = re.compile(r"^\s*RT\s*@\w+\s*:?", re.IGNORECASE)
 _URL = re.compile(r"(https?://\S+|www\.\S+)", re.IGNORECASE)
 _MENTION = re.compile(r"@\w+")
 _HASHTAG = re.compile(r"#(\w+)")
@@ -31,7 +34,10 @@ _TOKEN = re.compile(r"<URL>|<USER>|<NUM>|\w+|[^\w\s]")
 
 
 def _common(text: str) -> str:
+    # NFKC folds Arabic presentation forms (e.g. U+FEED) back to base letters.
+    text = unicodedata.normalize("NFKC", text)
     text = _INVISIBLE.sub("", text)
+    text = _RETWEET.sub("", text)
     text = _URL.sub(f" {URL_TOKEN} ", text)
     text = _MENTION.sub(f" {USER_TOKEN} ", text)
     return text

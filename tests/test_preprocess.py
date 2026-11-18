@@ -36,6 +36,15 @@ class TestFull:
     def test_arabizi_lowercased(self):
         assert preprocess("El Service 7ELW") == "el service 7elw"
 
+    def test_retweet_prefix_removed(self):
+        assert preprocess("RT @M__ali: الجو حلو") == "الجو حلو"
+
+    def test_mention_not_at_start_kept(self):
+        assert preprocess("شكرا @ali") == f"شكرا {USER_TOKEN}"
+
+    def test_presentation_forms_folded(self):
+        assert preprocess("\ufeed\ufe8e\ufedf\ufee0\ufeea") == preprocess("والله")  # contextual glyphs
+
     def test_non_string_returns_empty(self):
         assert preprocess(None) == ""
 
