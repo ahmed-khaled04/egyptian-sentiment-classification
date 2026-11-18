@@ -1,9 +1,11 @@
-"""Stratified 80/10/10 split, with neutral downsampled in train only.
+"""Stratified 80/10/10 split. All splits keep the natural label distribution;
+class imbalance is handled with class-weighted losses (capping neutral in train
+cost M1 ~3-4 macro-F1 points, so it was dropped).
 
     python -m src.data.split [--seed 42]
 
-Val and test keep the natural label distribution. Asserts that no normalized
-text is shared between splits or with the hand-made custom test set.
+Asserts that no normalized text is shared between splits or with the hand-made
+custom test set.
 """
 
 import argparse
@@ -26,16 +28,6 @@ def split(df: pd.DataFrame, seed: int = 42) -> dict[str, pd.DataFrame]:
     return {"train": train, "val": val, "test": test}
 
 
-def cap_neutral(train: pd.DataFrame, seed: int = 42) -> pd.DataFrame:
-    """Downsample neutral to the size of the negative class."""
-    n_cap = (train["label"] == "negative").sum()
-    neutral = train[train["label"] == "neutral"]
-    if len(neutral) > n_cap:
-        neutral = neutral.sample(n=n_cap, random_state=seed)
-    out = pd.concat([train[train["label"] != "neutral"], neutral])
-    return out.sample(frac=1, random_state=seed).reset_index(drop=True)
-
-
 def assert_no_overlap(named: dict[str, pd.DataFrame]) -> None:
     keys = {name: set(df["text"].map(dedup_key)) for name, df in named.items()}
     names = list(keys)
@@ -52,9 +44,7 @@ def main() -> None:
 
     df = pd.read_csv(PROCESSED_DIR / "all.csv")
     splits = split(df, args.seed)
-    stats = {"before_cap": {k: v["label"].value_counts().to_dict() for k, v in splits.items()}}
-    splits["train"] = cap_neutral(splits["train"], args.seed)
-    stats["after_cap"] = {k: v["label"].value_counts().to_dict() for k, v in splits.items()}
+    stats = {k: v["label"].value_counts().to_dict() for k, v in splits.items()}
 
     check = dict(splits)
     for f in sorted(CUSTOM_TEST_DIR.glob("*.csv")):

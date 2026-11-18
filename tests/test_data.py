@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.data.split import assert_no_overlap, cap_neutral, split
+from src.data.split import assert_no_overlap, split
 from src.data.unify import unify
 
 
@@ -55,17 +55,6 @@ class TestSplit:
     def test_stratified(self):
         s = split(make_dataset(), seed=0)
         assert (s["test"]["label"] == "neutral").sum() == 30
-
-    def test_cap_neutral_only_reduces_neutral(self):
-        train = split(make_dataset(), seed=0)["train"]
-        capped = cap_neutral(train, seed=0)
-        counts = capped["label"].value_counts()
-        assert counts["neutral"] == counts["negative"] == (train["label"] == "negative").sum()
-        assert counts["positive"] == (train["label"] == "positive").sum()
-
-    def test_cap_neutral_is_deterministic(self):
-        train = split(make_dataset(), seed=0)["train"]
-        assert cap_neutral(train, 1)["text"].tolist() == cap_neutral(train, 1)["text"].tolist()
 
     def test_assert_no_overlap_detects_normalized_leak(self):
         a = frame([("الخدمة حلوة", "positive")])
