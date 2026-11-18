@@ -30,7 +30,9 @@ METRIC_COLS = ["macro_f1", "accuracy", *[f"f1_{l}" for l in LABELS]]
 
 
 def load_test_sets() -> dict[str, pd.DataFrame]:
-    return {name: pd.read_csv(path) for name, path in TEST_SETS.items() if path.exists()}
+    """Existing, non-empty test sets (the custom ones fill up as annotation progresses)."""
+    sets = {name: pd.read_csv(path) for name, path in TEST_SETS.items() if path.exists()}
+    return {name: df for name, df in sets.items() if len(df)}
 
 
 def aggregate(summary: pd.DataFrame) -> pd.DataFrame:

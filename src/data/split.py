@@ -48,7 +48,9 @@ def main() -> None:
 
     check = dict(splits)
     for f in sorted(CUSTOM_TEST_DIR.glob("*.csv")):
-        check[f"custom:{f.name}"] = pd.read_csv(f)
+        custom = pd.read_csv(f, dtype=str)
+        text_col = "text" if "text" in custom.columns else "text_msa"  # msa_sheet.csv uses text_msa
+        check[f"custom:{f.name}"] = pd.DataFrame({"text": custom[text_col].dropna()})
     assert_no_overlap(check)
 
     for name, part in splits.items():
