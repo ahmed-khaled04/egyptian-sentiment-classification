@@ -1,0 +1,29 @@
+# Core ML
+torch
+transformers
+datasets
+evaluate
+accelerate
+scikit-learn
+scipy
+
+# Data / text
+pandas
+numpy
+pyarabic
+emoji
+gensim
+pyyaml
+joblib
+
+# Analysis / viz
+matplotlib
+seaborn
+jupyter
+ipykernel
+
+# Demo
+gradio
+
+# Dev
+pytest

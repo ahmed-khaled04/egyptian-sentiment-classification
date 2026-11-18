@@ -1,0 +1,33 @@
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large artifacts (data, embeddings, checkpoints)
+data/raw/
+embeddings/
+models/
+wandb/
+runs/
+
+# Gradio
+.gradio/
+flagged/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Secrets
+.env
