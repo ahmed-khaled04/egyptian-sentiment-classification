@@ -1,6 +1,6 @@
 """Build a compact embedding matrix for M2/M3 from fastText Arabic (cc.ar.300).
 
-    python -m src.embeddings [--bin embeddings/raw/cc.ar.300.bin.gz] [--top-n 100000]
+    python -m src.embeddings [--bin embeddings/raw/cc.ar.300.bin] [--top-n 100000]
 
 Vocabulary = every token in the train split + the top-N most frequent fastText
 words, all passed through our own `preprocess` so they match model inputs.
@@ -21,7 +21,7 @@ import pandas as pd
 from src.preprocess import NUM_TOKEN, URL_TOKEN, USER_TOKEN, preprocess, tokenize
 from src.vocab import PAD, UNK
 
-DEFAULT_BIN = Path("embeddings/raw/cc.ar.300.bin.gz")
+DEFAULT_BIN = Path("embeddings/raw/cc.ar.300.bin")  # decompressed: gensim short-reads the .gz
 DEFAULT_OUT = Path("embeddings/fasttext_ar_300.npz")
 TRAIN_CSV = Path("data/processed/train.csv")
 
