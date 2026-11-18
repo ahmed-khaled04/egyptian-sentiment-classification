@@ -1,0 +1,13 @@
+name: tfidf_lr
+type: tfidf_lr
+seed: 42
+data:
+  train: data/processed/train.csv
+  val: data/processed/val.csv
+features:
+  word_ngram: [1, 2]
+  char_ngram: [2, 5]   # char_wb n-grams absorb dialect spelling variation
+  min_df: 2
+model:
+  C_grid: [0.1, 0.3, 1.0, 3.0, 10.0]   # picked by val macro-F1
+output_dir: models/tfidf_lr
