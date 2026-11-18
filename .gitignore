@@ -15,8 +15,8 @@ venv/
 
 # Large artifacts (data, embeddings, checkpoints)
 data/raw/
-embeddings/
-models/
+/embeddings/
+/models/
 wandb/
 runs/
 
