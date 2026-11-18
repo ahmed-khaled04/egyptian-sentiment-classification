@@ -73,14 +73,30 @@ class NeuralPredictor(Predictor):
         return predict_proba(self.model, self.vocab, texts, self.max_len, device="cpu")
 
 
+class TransformerPredictor(Predictor):
+    def __init__(self, name: str, display_name: str, path: Path):
+        from src.models.transformer import load_model
+
+        self.name, self.display_name = name, display_name
+        self.model, self.tokenizer, self.device = load_model(path.parent)
+        self.max_len = 128
+
+    def predict_proba(self, texts):
+        from src.models.transformer import predict_proba
+
+        return predict_proba(self.model, self.tokenizer, texts, self.max_len, self.device)
+
+
 # name -> (display name, kind)
 REGISTRY = {
     "tfidf_lr": ("M1: TF-IDF + LogReg", "sklearn"),
     "emb_avg": ("M2: Embedding avg + Linear", "neural"),
     "emb_lstm": ("M3: Embedding + BiLSTM", "neural"),
+    "msa_bert": ("M4: CAMeLBERT-MSA", "transformer"),
+    "dialect_bert": ("M5: CAMeLBERT-DA (dialect)", "transformer"),
 }
-ARTIFACT = {"sklearn": "model.joblib", "neural": "model.pt"}
-LOADERS = {"sklearn": SklearnPredictor, "neural": NeuralPredictor}
+ARTIFACT = {"sklearn": "model.joblib", "neural": "model.pt", "transformer": "config.json"}
+LOADERS = {"sklearn": SklearnPredictor, "neural": NeuralPredictor, "transformer": TransformerPredictor}
 
 
 def _artifact(name: str, seed: int | None) -> Path:

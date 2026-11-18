@@ -1,0 +1,15 @@
+name: dialect_bert
+type: transformer
+model_name: CAMeL-Lab/bert-base-arabic-camelbert-da   # dialectal Arabic pretraining
+seeds: [42, 43, 44]
+data:
+  train: data/processed/train.csv
+  val: data/processed/val.csv
+# Identical to the other BERT config on purpose: only model_name differs.
+max_len: 128
+lr: 2.0e-5
+batch_size: 32
+epochs: 4
+warmup_ratio: 0.1
+weight_decay: 0.01
+output_dir: models/dialect_bert

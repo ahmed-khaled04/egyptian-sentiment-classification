@@ -11,11 +11,12 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from src.models import neural, tfidf_lr
+from src.models import neural, tfidf_lr, transformer
 
 TRAINERS = {
     "tfidf_lr": tfidf_lr.train,
     "neural": neural.train,
+    "transformer": transformer.train,
 }
 
 
